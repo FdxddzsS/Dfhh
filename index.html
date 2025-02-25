@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مشغل الفيديوهات</title>
+  <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #000; font-family: 'Arial', sans-serif; color: white; }
+    .swiper { width: 100%; height: 100vh; }
+    .video-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
+    video { width: 100%; height: auto; object-fit: cover; }
+    .controls { display: flex; gap: 15px; margin: 10px 0; position: absolute; bottom: 10px; left: 10px; }
+    .controls button { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+    .like-count { font-size: 18px; margin-right: 5px; }
+    .comment-section { position: absolute; bottom: 50px; left: 10px; width: 250px; background: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px; }
+    .comment-input { width: 70%; padding: 5px; border: none; background: white; color: black; }
+    .send-comment { padding: 5px; background: #007BFF; color: white; border: none; cursor: pointer; }
+    .comments { margin-top: 5px; max-height: 100px; overflow-y: auto; }
+    .comment { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid gray; }
+    .comment-text { cursor: pointer; }
+    .delete-comment { background: red; color: white; border: none; cursor: pointer; padding: 2px 5px; }
+  </style>
+</head>
+<body>
+  <div class="swiper">
+    <div class="swiper-wrapper">
+      <!-- سيتم إضافة الفيديوهات هنا عبر الجافاسكريبت -->
+    </div>
+    <div class="swiper-pagination"></div>
+  </div>
+
+  <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
+  <script>
+    const videos = [
+      "https://e.top4top.io/m_3343okrfd0.mp4",
+      "https://i.top4top.io/m_33430sh7r1.mp4",
+      "https://b.top4top.io/m_33434zd4t2.mp4"
+    ];
+
+    const swiperWrapper = document.querySelector('.swiper-wrapper');
+    let randomIndex = Math.floor(Math.random() * videos.length);
+
+    videos.forEach((videoSrc, index) => {
+      const videoId = `video-${index}`;
+      const slide = document.createElement('div');
+      slide.classList.add('swiper-slide');
+      slide.innerHTML = `
+        <div class="video-container">
+          <video id="${videoId}" src="${videoSrc}" ${index === randomIndex ? "autoplay" : ""} playsinline controlslist="nodownload"></video>
+          <div class="controls">
+            <button class="like-button" data-video="${videoId}">👍</button>
+            <span class="like-count" id="like-count-${videoId}">0</span>
+            <button class="comment-button">💬</button>
+          </div>
+          <div class="comment-section" style="display: none;">
+            <input type="text" class="comment-input" placeholder="اكتب تعليقك..." data-video="${videoId}">
+            <button class="send-comment">إرسال</button>
+            <div class="comments" id="comments-${videoId}"></div>
+          </div>
+        </div>
+      `;
+      swiperWrapper.appendChild(slide);
+    });
+
+    const swiper = new Swiper('.swiper', {
+      direction: 'vertical',
+      slidesPerView: 1,
+      spaceBetween: 0,
+      mousewheel: true,
+      pagination: { el: '.swiper-pagination', clickable: true },
+      on: { slideChange: function () { handleSlideChange(this); } }
+    });
+
+    function handleSlideChange(swiper) {
+      const prevSlide = swiper.slides[swiper.previousIndex];
+      const prevVideo = prevSlide.querySelector('video');
+      prevVideo.pause();
+      prevVideo.currentTime = 0;
+
+      const currentSlide = swiper.slides[swiper.activeIndex];
+      const currentVideo = currentSlide.querySelector('video');
+      currentVideo.play();
+    }
+
+    document.querySelectorAll('.swiper-slide').forEach(slide => {
+      const video = slide.querySelector('video');
+      const container = slide.querySelector('.video-container');
+      handleVideoControls(video, container);
+    });
+
+    function handleVideoControls(video, container) {
+      const likeBtn = container.querySelector('.like-button');
+      const likeCount = container.querySelector('.like-count');
+      const commentBtn = container.querySelector('.comment-button');
+      const commentSection = container.querySelector('.comment-section');
+      const commentInput = container.querySelector('.comment-input');
+      const sendCommentBtn = container.querySelector('.send-comment');
+      const commentsContainer = container.querySelector('.comments');
+      const videoId = video.id;
+
+      likeBtn.addEventListener('click', () => {
+        let likes = localStorage.getItem(`likes-${videoId}`) || 0;
+        likes = parseInt(likes) + 1;
+        localStorage.setItem(`likes-${videoId}`, likes);
+        likeCount.innerText = likes;
+      });
+
+      commentBtn.addEventListener('click', () => {
+        commentSection.style.display = commentSection.style.display === "none" ? "block" : "none";
+      });
+
+      sendCommentBtn.addEventListener('click', () => {
+        if (commentInput.value.trim() !== '') {
+          let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`)) || [];
+          comments.push(commentInput.value.trim());
+          localStorage.setItem(`comments-${videoId}`, JSON.stringify(comments));
+          displayComments(videoId, commentsContainer);
+          commentInput.value = '';
+        }
+      });
+
+      displayComments(videoId, commentsContainer);
+      loadLikes(videoId, likeCount);
+    }
+
+    function loadLikes(videoId, likeCount) {
+      let likes = localStorage.getItem(`likes-${videoId}`) || 0;
+      likeCount.innerText = likes;
+    }
+
+    function displayComments(videoId, commentSection) {
+      let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`)) || [];
+      commentSection.innerHTML = comments.map((comment, index) => `
+        <div class="comment">
+          <span class="comment-text" onclick="editComment('${videoId}', ${index})">${comment}</span>
+          <button class="delete-comment" onclick="deleteComment('${videoId}', ${index})">❌</button>
+        </div>
+      `).join('');
+    }
+
+    function editComment(videoId, index) {
+      let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`));
+      let newComment = prompt("تعديل التعليق:", comments[index]);
+      if (newComment !== null) {
+        comments[index] = newComment;
+        localStorage.setItem(`comments-${videoId}`, JSON.stringify(comments));
+        displayComments(videoId, document.getElementById(`comments-${videoId}`));
+      }
+    }
+
+    function deleteComment(videoId, index) {
+      let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`));
+      comments.splice(index, 1);
+      localStorage.setItem(`comments-${videoId}`, JSON.stringify(comments));
+      displayComments(videoId, document.getElementById(`comments-${videoId}`));
+    }
+  </script>
+</body>
+</html>
