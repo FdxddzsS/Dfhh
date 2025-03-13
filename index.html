@@ -1,161 +1,35 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مشغل الفيديوهات</title>
-  <link rel="stylesheet" href="https://unpkg.com/swiper@8/swiper-bundle.min.css">
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #000; font-family: 'Arial', sans-serif; color: white; }
-    .swiper { width: 100%; height: 100vh; }
-    .video-container { position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; }
-    video { width: 100%; height: auto; object-fit: cover; }
-    .controls { display: flex; gap: 15px; margin: 10px 0; position: absolute; bottom: 10px; left: 10px; }
-    .controls button { background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
-    .like-count { font-size: 18px; margin-right: 5px; }
-    .comment-section { position: absolute; bottom: 50px; left: 10px; width: 250px; background: rgba(0, 0, 0, 0.7); padding: 10px; border-radius: 5px; }
-    .comment-input { width: 70%; padding: 5px; border: none; background: white; color: black; }
-    .send-comment { padding: 5px; background: #007BFF; color: white; border: none; cursor: pointer; }
-    .comments { margin-top: 5px; max-height: 100px; overflow-y: auto; }
-    .comment { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid gray; }
-    .comment-text { cursor: pointer; }
-    .delete-comment { background: red; color: white; border: none; cursor: pointer; padding: 2px 5px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open URL Video in xPola Player</title>
+    <meta name="description" content="Experience seamless video playback with Xpola Player. Our page allows you to effortlessly play video URLs, offering high-quality streaming with minimal buffering. Perfect for viewers seeking an optimized watching experience. Click to enjoy your favorite videos now.">
+    <link rel="shortcut icon" type="image/x-icon" href="/assets/images/favicon.png" />
+	<meta property="og:image" content=""/>
+
+<style> body { display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background-color: #000;
+    background-image: url('');
+    background-size: cover;
+    background-repeat: no-repeat; 
+    background-position: center; 
+
+ } .play-button { background-color: #f7f7f7; color: #fff; border: none; padding: 10px; font-size: 24px; cursor: pointer; border-radius: 50%; display: flex; align-items: center; justify-content: center; position: relative; } .play-button:hover { background-color: #999; } .message-box { background-color: #333; border-radius: 8px; padding: 20px; text-align: center; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 300px; z-index: 1000; } .message-box p { margin: 0 0 20px; color: #ecf0f1; } } .message-box .actions { margin-top: 20px; } .message-box button { background-color: transparent; border: none; color: #f40; font-size: 16px; margin: 0 10px; padding: 6px; cursor: pointer; } .message-box button:hover { text-decoration: underline; } .message-box .checkbox-container { display: flex; align-items: center; justify-content: center; margin-top: 20px; } .message-box .checkbox-container input { margin-right: 10px; } label { color: #9E9E9E; } 
+
+</style>
+
 </head>
 <body>
-  <div class="swiper">
-    <div class="swiper-wrapper">
-      <!-- سيتم إضافة الفيديوهات هنا عبر الجافاسكريبت -->
-    </div>
-    <div class="swiper-pagination"></div>
-  </div>
 
-  <script src="https://unpkg.com/swiper@8/swiper-bundle.min.js"></script>
-  <script>
-    const videos = [
-      "https://e.top4top.io/m_3343okrfd0.mp4",
-      "https://i.top4top.io/m_33430sh7r1.mp4",
-      "https://b.top4top.io/m_33434zd4t2.mp4"
-    ];
-
-    const swiperWrapper = document.querySelector('.swiper-wrapper');
-    let randomIndex = Math.floor(Math.random() * videos.length);
-
-    videos.forEach((videoSrc, index) => {
-      const videoId = `video-${index}`;
-      const slide = document.createElement('div');
-      slide.classList.add('swiper-slide');
-      slide.innerHTML = `
-        <div class="video-container">
-          <video id="${videoId}" src="${videoSrc}" ${index === randomIndex ? "autoplay" : ""} playsinline controlslist="nodownload"></video>
-          <div class="controls">
-            <button class="like-button" data-video="${videoId}">👍</button>
-            <span class="like-count" id="like-count-${videoId}">0</span>
-            <button class="comment-button">💬</button>
-          </div>
-          <div class="comment-section" style="display: none;">
-            <input type="text" class="comment-input" placeholder="اكتب تعليقك..." data-video="${videoId}">
-            <button class="send-comment">إرسال</button>
-            <div class="comments" id="comments-${videoId}"></div>
-          </div>
-        </div>
-      `;
-      swiperWrapper.appendChild(slide);
-    });
-
-    const swiper = new Swiper('.swiper', {
-      direction: 'vertical',
-      slidesPerView: 1,
-      spaceBetween: 0,
-      mousewheel: true,
-      pagination: { el: '.swiper-pagination', clickable: true },
-      on: { slideChange: function () { handleSlideChange(this); } }
-    });
-
-    function handleSlideChange(swiper) {
-      const prevSlide = swiper.slides[swiper.previousIndex];
-      const prevVideo = prevSlide.querySelector('video');
-      prevVideo.pause();
-      prevVideo.currentTime = 0;
-
-      const currentSlide = swiper.slides[swiper.activeIndex];
-      const currentVideo = currentSlide.querySelector('video');
-      currentVideo.play();
-    }
-
-    document.querySelectorAll('.swiper-slide').forEach(slide => {
-      const video = slide.querySelector('video');
-      const container = slide.querySelector('.video-container');
-      handleVideoControls(video, container);
-    });
-
-    function handleVideoControls(video, container) {
-      const likeBtn = container.querySelector('.like-button');
-      const likeCount = container.querySelector('.like-count');
-      const commentBtn = container.querySelector('.comment-button');
-      const commentSection = container.querySelector('.comment-section');
-      const commentInput = container.querySelector('.comment-input');
-      const sendCommentBtn = container.querySelector('.send-comment');
-      const commentsContainer = container.querySelector('.comments');
-      const videoId = video.id;
-
-      likeBtn.addEventListener('click', () => {
-        let likes = localStorage.getItem(`likes-${videoId}`) || 0;
-        likes = parseInt(likes) + 1;
-        localStorage.setItem(`likes-${videoId}`, likes);
-        likeCount.innerText = likes;
-      });
-
-      commentBtn.addEventListener('click', () => {
-        commentSection.style.display = commentSection.style.display === "none" ? "block" : "none";
-      });
-
-      sendCommentBtn.addEventListener('click', () => {
-        if (commentInput.value.trim() !== '') {
-          let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`)) || [];
-          comments.push(commentInput.value.trim());
-          localStorage.setItem(`comments-${videoId}`, JSON.stringify(comments));
-          displayComments(videoId, commentsContainer);
-          commentInput.value = '';
-        }
-      });
-
-      displayComments(videoId, commentsContainer);
-      loadLikes(videoId, likeCount);
-    }
-
-    function loadLikes(videoId, likeCount) {
-      let likes = localStorage.getItem(`likes-${videoId}`) || 0;
-      likeCount.innerText = likes;
-    }
-
-    function displayComments(videoId, commentSection) {
-      let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`)) || [];
-      commentSection.innerHTML = comments.map((comment, index) => `
-        <div class="comment">
-          <span class="comment-text" onclick="editComment('${videoId}', ${index})">${comment}</span>
-          <button class="delete-comment" onclick="deleteComment('${videoId}', ${index})">❌</button>
-        </div>
-      `).join('');
-    }
-
-    function editComment(videoId, index) {
-      let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`));
-      let newComment = prompt("تعديل التعليق:", comments[index]);
-      if (newComment !== null) {
-        comments[index] = newComment;
-        localStorage.setItem(`comments-${videoId}`, JSON.stringify(comments));
-        displayComments(videoId, document.getElementById(`comments-${videoId}`));
-      }
-    }
-
-    function deleteComment(videoId, index) {
-      let comments = JSON.parse(localStorage.getItem(`comments-${videoId}`));
-      comments.splice(index, 1);
-      localStorage.setItem(`comments-${videoId}`, JSON.stringify(comments));
-      displayComments(videoId, document.getElementById(`comments-${videoId}`));
-    }
-  </script>
+<button onClick="location.href='intent://XPOLA808eGRkYGMqPz92fHFoPX11dHlxPnN/fT9meXR1fz1jeHF7cT92fHFoPWB8cWl1Yj5geGAveXQteGRkYGM1I1E1IlY1IlZ8eWZ1PXQ9ICI9ZH90ZGY9dHI+cXtxfXF5anV0Pn51ZDUiVmZxYnlxfmQ1IlZmIXJ8cXN7f2VkNSJWY2B/PXh0PSMpPXQ9Y3h/YmR0ZmI1IlZUUUNYT1RRQ1g1IlZceWZ1NSJWc3hxfn51fDUiKHV+ZD14dD0gJTUiKTUiVn1xfnl2dWNkPn1gdDUjVnh0fmRjNSNUY2Q1I1QhJyQhKCkiIycobnVoYDUjVCEnJCEpICYnJyhucXN8NSNUNSJWZnFieXF+ZDUiVmYhcnxxc3t/ZWQ1IlZjYH89eHQ9Iyk9dD1jeH9iZHRmYjUiVjUiUW50cWRxNSNUcyJ1KHF0ciI9cydxJj0kIiUkPXIodnY9ISJydXYhdigldSN1bnh9cXM1I1RxIigoIHJzISMiJXMidCJ2diQkc3EhcyB1JSQpIyBxJXYmJilxKCFxc3YgJCVxdCQmdnRzdSgjJXJ1IHIlKXIjNnt1aS0gcScpIyR0dHRzIyEjJnEmKSIiJSgkcikmcyN2dCF1JSomJyZ1JnQhdHQgIHJ2cnUiJiYgICN1dnF2IHUjcXEgIjZ8f3d/LTZ8eX57LWxgfHFpdWI9ZGlgdS1ndXJgfHFpdWJsZHlkfHUtcnV5fjB9f2Z5dWMwdGJxfXE=;#Intent;scheme=xmtv;package=com.xpola.player;end'" class="play-button">
+<svg fill="#000000" height="80px" width="80px" version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 60 60" xml:space="preserve">
+    <g>
+        <path d="M45.563,29.174l-22-15c-0.307-0.208-0.703-0.231-1.031-0.058C22.205,14.289,22,14.629,22,15v30 c0,0.371,0.205,0.711,0.533,0.884C22.679,45.962,22.84,46,23,46c0.197,0,0.394-0.059,0.563-0.174l22-15 C45.836,30.64,46,30.331,46,30S45.836,29.36,45.563,29.174z M24,43.107V16.893L43.225,30L24,43.107z"/>
+        <path d="M30,0C13.458,0,0,13.458,0,30s13.458,30,30,30s30-13.458,30-30S46.542,0,30,0z M30,58C14.561,58,2,45.439,2,30 S14.561,2,30,2s28,12.561,28,28S45.439,58,30,58z"/>
+    </g>
+</svg>
+</button>
 </body>
 </html>
+
+    
